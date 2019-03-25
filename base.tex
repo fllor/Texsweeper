@@ -1,0 +1,181 @@
+\usepackage{animate}
+\usepackage{media9}
+\usepackage{tikz}
+
+\definecolor{color1}{RGB}{56,108,241}
+\definecolor{color2}{RGB}{38,164,66}
+\definecolor{color3}{RGB}{216,56,56}
+\definecolor{color4}{RGB}{149,52,200}
+\definecolor{color5}{RGB}{122,43,26}
+\definecolor{color6}{RGB}{42,194,189}
+\definecolor{color7}{RGB}{126,126,126}
+\definecolor{color8}{RGB}{35,35,35}
+
+\newcommand{\back}{\hspace*{-0.13cm}}
+
+\newcommand*{\makeMine}[3]{
+    \begin{animateinline}[label=mine#1x#2]{1}
+        \tikz{\node[fill=gray,minimum width=1cm,minimum height=1cm] {};}
+    \newframe
+        \tikz{\node[fill=lightgray,minimum width=1cm,minimum height=1cm] {};
+            \draw[thick] (0,0.4)--(0,-0.4) (0.4,0)--(-0.4,0) (0.28,0.28)--(-0.28,-0.28) (0.28,-0.28)--(-0.28,0.28);
+            \draw[fill=red] (0,0) circle(0.2);}
+    \newframe
+        \tikz{\node[fill=gray,minimum width=1cm,minimum height=1cm] {};
+            \draw[fill=red] (-0.15,0.3)--(0.2,0.15)--(-0.15,0)--cycle;
+            \draw[thick] (-0.15,-0.3)--(-0.15,0.3);}
+    \newframe
+        \tikz{\node[fill=lightgray,minimum width=1cm,minimum height=1cm] {};}
+    \newframe
+        \tikz{\node[fill=lightgray,minimum width=1cm,minimum height=1cm,text centered,text=color1] {\LARGE\textbf{1}};}
+    \newframe
+        \tikz{\node[fill=lightgray,minimum width=1cm,minimum height=1cm,text centered,text=color2] {\LARGE\textbf{2}};}
+    \newframe
+        \tikz{\node[fill=lightgray,minimum width=1cm,minimum height=1cm,text centered,text=color3] {\LARGE\textbf{3}};}
+    \newframe
+        \tikz{\node[fill=lightgray,minimum width=1cm,minimum height=1cm,text centered,text=color4] {\LARGE\textbf{4}};}
+    \newframe
+        \tikz{\node[fill=lightgray,minimum width=1cm,minimum height=1cm,text centered,text=color5] {\LARGE\textbf{5}};}
+    \newframe
+        \tikz{\node[fill=lightgray,minimum width=1cm,minimum height=1cm,text centered,text=color6] {\LARGE\textbf{6}};}
+    \newframe
+        \tikz{\node[fill=lightgray,minimum width=1cm,minimum height=1cm,text centered,text=color7] {\LARGE\textbf{7}};}
+    \newframe
+        \tikz{\node[fill=lightgray,minimum width=1cm,minimum height=1cm,text centered,text=color8] {\LARGE\textbf{8}};}
+    \newframe
+        \tikz{\node[fill=green,minimum width=1cm,minimum height=1cm] {};
+            \draw[fill=red] (-0.15,0.3)--(0.2,0.15)--(-0.15,0)--cycle;
+            \draw[thick] (-0.15,-0.3)--(-0.15,0.3);}
+    \end{animateinline}%
+    \hspace{-1cm}\back%
+    \mediabutton[jsaction={
+        var dim = #3;
+        var num_mines = Math.floor(dim*dim*0.2);
+        var mines = anim["mines"];
+        if(typeof mines == "undefined" || mines == 0) {
+            mines = new Array(dim*dim);
+            for(var n = 0; n < dim*dim; n++)
+                mines[n] = false;
+            for(var n = 0; n < num_mines; n++) {
+                var x = Math.floor(dim * Math.random());
+                var y = Math.floor(dim * Math.random());
+                if(mines[x*dim + y] || (Math.abs(x-#1) <= 1 && Math.abs(y-#2) <= 1))
+                    n--;
+                else
+                    mines[x*dim + y] = true;
+            }
+            anim["mines"] = mines;
+        }
+        function uncover(x, y) {
+            if(anim["mine" + x + "x" + y].frameNum != 0)
+                return;
+            if(mines[x*dim + y]) {
+                anim["mine" + x + "x" + y].frameNum = 1;
+                anim["lost"] = 1;
+                return;
+            }
+            var num = 0;
+            for(var i = Math.max(0, x-1); i < Math.min(dim, x+2); i++)
+                for(var j = Math.max(0, y-1); j < Math.min(dim, y+2); j++)
+                    if(x != i || y != j)
+                        if(mines[i*dim+j])
+                            num++;
+            anim["mine" + x + "x" + y].frameNum=num+3;
+            if(num == 0)
+                for(var i = Math.max(0, x-1); i < Math.min(dim, x+2); i++)
+                    for(var j = Math.max(0, y-1); j < Math.min(dim, y+2); j++)
+                        if(x != i || y != j)
+                            uncover(i, j);
+        }
+        if(anim["lost"] != 1) {
+            if(anim["flagBox"].frameNum == 1) {
+                if(anim["mine" + #1 + "x" + #2].frameNum == 0) anim["mine" + #1 + "x" + #2].frameNum = 2;
+                else if(anim["mine" + #1 + "x" + #2].frameNum == 2) anim["mine" + #1 + "x" + #2].frameNum = 0;
+                anim["flagBox"].frameNum = 0;
+            } else if(anim["mine" + #1 + "x" + #2].frameNum == 0)
+                uncover(#1, #2);
+            else if(anim["mine" + #1 + "x" + #2].frameNum >= 4) {
+                var flag_count = 0;
+                for(var x = Math.max(0, #1-1); x < Math.min(dim, #1+2); x++)
+                    for(var y = Math.max(0, #2-1); y < Math.min(dim, #2+2); y++)
+                        if(anim["mine" + x + "x" + y].frameNum == 2)
+                            flag_count++;
+                if(flag_count+3 == anim["mine" + #1 + "x" + #2].frameNum)
+                for(var x = Math.max(0, #1-1); x < Math.min(dim, #1+2); x++)
+                    for(var y = Math.max(0, #2-1); y < Math.min(dim, #2+2); y++)
+                        uncover(x, y);
+            }
+            var found_mines = 0;
+            for(var x = 0; x < dim; x++)
+                for(var y = 0; y < dim;  y++) {
+                    if(anim["mine" + x + "x" + y].frameNum == 2 && mines[x*dim+y])
+                        found_mines++;
+                    else if(anim["mine" + x + "x" + y].frameNum == 2 || mines[x*dim+y])
+                        found_mines--;
+                }
+            if(found_mines == num_mines) {
+                for(var x = 0; x < dim; x++)
+                    for(var y = 0; y < dim;  y++)
+                        if(anim["mine" + x + "x" + y].frameNum == 2)
+                            anim["mine" + x + "x" + y].frameNum = 12;
+                anim["lost"] = 1;
+            }
+        }
+    }]{
+        \tikz{\node[draw,minimum width=1cm,minimum height=1cm] {};}
+    }%
+}
+
+% Setup game field
+\newcommand{\makeMines}[1]{
+    \foreach \i in {0,...,#1-1}{ %
+        \foreach \j in {0,...,#1-1}{%
+            \makeMine{\i}{\j}{#1} \hspace*{-0.35cm}%
+        } \\ \vspace*{-0.1cm}%
+    }
+    \vspace{0.5cm}
+}
+
+
+% Toggle flag more
+\newcommand{\makeFlagButton}{
+    \begin{animateinline}[label=flagBox]{1}
+        \tikz{\node[fill=gray,minimum width=1cm,minimum height=1cm] {};
+            \draw[fill=red] (-0.15,0.3)--(0.2,0.15)--(-0.15,0)--cycle;
+            \draw[thick] (-0.15,-0.3)--(-0.15,0.3);}
+    \newframe
+        \tikz{\node[fill=green,minimum width=1cm,minimum height=1cm] {};
+            \draw[fill=red] (-0.15,0.3)--(0.2,0.15)--(-0.15,0)--cycle;
+            \draw[thick] (-0.15,-0.3)--(-0.15,0.3);}
+    \end{animateinline}%
+    \hspace{-1cm}%
+    \mediabutton[jsaction={
+        if(anim["flagBox"].frameNum == 1)
+            anim["flagBox"].frameNum = 0;
+        else
+            anim["flagBox"].frameNum = 1;
+    }]{\tikz{\node[draw,minimum width=1cm,minimum height=1cm] {};}}
+}
+
+% Reset game
+\newcommand{\makeResetButton}[1]{
+    \tikz{\node[fill=gray,minimum width=1cm,minimum height=1cm] {};
+        \draw[->,thick,blue](0,-0.3) arc(270:0:0.3);
+    }%
+    \hspace{-1cm}%
+    \mediabutton[jsaction={
+        var dim = #1;
+        for(var i = 0; i < dim; i++)
+            for(var j = 0; j < dim; j++)
+                anim["mine" + i + "x" + j].frameNum = 0;
+        anim["mines"] = 0;
+        anim["lost"] = 0;
+    }]{\tikz{\node[draw,minimum width=1cm,minimum height=1cm] {};}}
+}
+
+% options Javascript debug window in Adobe Reader
+\newcommand{\makeDebugButton}{
+    \mediabutton[jsaction={
+        non_existing_function();
+    }]{\fbox{Debug}}
+}

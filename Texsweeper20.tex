@@ -1,0 +1,17 @@
+\documentclass{article}
+
+\usepackage[margin=0.5cm,paperheight=22cm,paperwidth=22cm]{geometry}
+\pagenumbering{gobble}
+
+\input{base.tex}
+
+\begin{document}
+\centering
+
+\makeMines{20}
+
+\makeFlagButton
+\hspace{1cm}
+\makeResetButton{20}
+
+\end{document}
